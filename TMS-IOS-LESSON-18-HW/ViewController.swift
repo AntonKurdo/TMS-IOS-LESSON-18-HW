@@ -56,7 +56,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        
         let notificationCenter = NotificationCenter.default
         notificationCenter.addObserver(self, selector: #selector(adjustForKeyboard), name: UIResponder.keyboardWillShowNotification, object: nil)
         notificationCenter.addObserver(self, selector: #selector(adjustForKeyboard), name: UIResponder.keyboardWillHideNotification, object: nil)
@@ -67,8 +67,6 @@ class ViewController: UIViewController, UITextFieldDelegate {
         setupTextField()
         setupButton()
     }
-    
-    
     
     @objc
     private func adjustForKeyboard(notification: Notification) {
@@ -84,6 +82,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
     private func setupScrollView() {
         view.addSubview(scrollView)
         scrollView.frame = CGRect(x: 0, y: 0, width: screenSize.width, height: screenSize.height)
+        scrollView.isScrollEnabled = false
     }
     
     private func setupLabel() {
@@ -93,7 +92,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
     
     private func setupTextField() {
         scrollView.addSubview(textField)
-    
+        
         NSLayoutConstraint.activate([
             textField.topAnchor.constraint(equalTo: label.bottomAnchor, constant: 20),
             textField.leftAnchor.constraint(equalTo: view.leftAnchor, constant: 16),
@@ -120,9 +119,18 @@ class ViewController: UIViewController, UITextFieldDelegate {
         ])
         
         button.addAction(UIAction(handler: {_ in
+            // fade text animation
+            let animation = CATransition()
+            animation.timingFunction = CAMediaTimingFunction(name: CAMediaTimingFunctionName.easeInEaseOut)
+            animation.type = CATransitionType.fade
+            animation.duration = 0.4
+            self.label.layer.add(animation, forKey: CATransitionType.fade.rawValue)
+            
             self.label.text = self.textField.text
+            
             self.textField.text = ""
             self.labelValue = ""
+            self.view.endEditing(true)
         }), for: .touchUpInside)
     }
 }
@@ -136,8 +144,8 @@ extension UIViewController:  UIGestureRecognizerDelegate {
     }
     
     public func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
-         return !(touch.view is UIButton)
-     }
+        return !(touch.view is UIButton)
+    }
     
     @objc func dismissKeyboard() {
         view.endEditing(true)
